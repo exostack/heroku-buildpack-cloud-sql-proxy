@@ -27,5 +27,18 @@ variable. Format: `<instance connection name>=tcp:<local port>`. You can get the
 Set the connection string for your DB library to
 `postgres://<username>:<password>@localhost:<local port>/<database-name>`
 
-Start the proxy before your app tries to connect to the database by e.g. adding
-`bin/run_cloud_sql_proxy` to the `.profile` in the root of your project.
+> [!WARNING]
+> You need to launch the proxy yourself, before your app tries to connect to the database.
+
+The best place to do it is in the `.profile` file (launched by heroku before everything, see https://devcenter.heroku.com/articles/dynos#the-profile-file)
+
+Start the proxy before your app tries to connect to the database by e.g. adding the following to your `.profile`:
+
+```bash
+# with the credentials as env variable
+printf "%s" "$GSP_CREDENTIALS" > /app/google/credentials.json
+exec /app/google/bin/cloud_sql_proxy --credentials-file=/app/google/credentials.json $GSP_INSTANCES &
+
+# or with the credentials as file path
+exec /app/google/bin/cloud_sql_proxy --credentials-file=$GSP_CREDENTIALS_FILE_PATH $GSP_INSTANCES &
+```
